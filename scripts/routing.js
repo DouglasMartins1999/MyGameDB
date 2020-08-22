@@ -69,6 +69,12 @@ router.get("/search", async (req, resp, next) => {
     return next();
 })
 
+router.get("/delete/:id", async (req, resp, next) => {
+    await database.delete().from("games").where("id", req.params.id);
+    resp.json({ msg: "Deleted" });
+    return next();
+})
+
 router.get("/", async (req, resp, next) => {
     const games = await database.select("id", "cover").from("games");
     games.sort((a, b) => {
@@ -94,7 +100,7 @@ router.get("/:id", async (req, resp, next) => {
         .replace("{{ gametitle }}", game.name)
         .replace("{{ cover }}", game.cover)
         .replace("{{ date }}", moment(game.launchDate).format("MM/YYYY"))
-        .replace("{{ popularity }}", (game.popularity || 0).toFixed(2))
+        .replace("{{ popularity }}", (parseFloat(game.popularity) || 0).toFixed(2))
         .replace("{{ genres }}", JSON.parse(game.genres || "[]").map(g => `<li>${g}</li>`).join(""))
         .replace("{{ description }}", game.description || "Não Informada")
         .replace("{{ summary }}", game.summary || "Não Informado")
