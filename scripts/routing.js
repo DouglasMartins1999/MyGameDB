@@ -27,9 +27,10 @@ router.get("/:id", async (req, resp, next) => {
 
     const template = fs.readFileSync("./templates/page.htm").toString()
         .replace("{{ title }}", game.name)
+        .replace("{{ gametitle }}", game.name)
         .replace("{{ cover }}", game.cover)
         .replace("{{ date }}", moment(game.launchDate).format("MM/YYYY"))
-        .replace("{{ popularity }}", game.popularity.toFixed(2))
+        .replace("{{ popularity }}", (game.popularity || 0).toFixed(2))
         .replace("{{ genres }}", game.genres.split(",").map(g => `<li>${g}</li>`))
         .replace("{{ description }}", game.description || "Não Informada")
         .replace("{{ summary }}", game.summary || "Não Informado")
@@ -56,25 +57,29 @@ router.get("/register/:id", async (req, resp, next) => {
             return game;
         })
 
-    g.screenshots = await client.fields("url")
-        .where("id = (" + baseGame.screenshots.toString() + ")")
-        .request("/screenshots")
-        .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p")));
-
-    g.trailers = await client.fields("video_id")
-        .where("id = (" + baseGame.videos.toString() + ")")
-        .request("/game_videos")
-        .then(resp => resp.data.map(d => d.video_id));
-
-    g.genres = await client.fields("name")
-        .where("id = (" + baseGame.genres.toString() + ")")
-        .request("/genres")
-        .then(resp => resp.data.map(d => d.name)[0])
-
-    g.cover = await client.fields("url")
-        .where("id = (" + baseGame.cover.toString() + ")")
-        .request("/covers")
-        .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p"))[0])
+    try {
+        g.screenshots = await client.fields("url")
+            .where("id = (" + baseGame.screenshots?.toString() + ")")
+            .request("/screenshots")
+            .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p")));
+    
+        g.trailers = await client.fields("video_id")
+            .where("id = (" + baseGame.videos?.toString() + ")")
+            .request("/game_videos")
+            .then(resp => resp.data.map(d => d.video_id));
+    
+        g.genres = await client.fields("name")
+            .where("id = (" + baseGame.genres?.toString() + ")")
+            .request("/genres")
+            .then(resp => resp.data.map(d => d.name)[0])
+    
+        g.cover = await client.fields("url")
+            .where("id = (" + baseGame.cover?.toString() + ")")
+            .request("/covers")
+            .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p"))[0])
+    } catch(e){
+        console.error(e);
+    }
 
     await database.insert(g).into("games")
     resp.json(g);
