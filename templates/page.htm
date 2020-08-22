@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300,400;700;900&display=swap" rel="stylesheet">  
+    <style>
+        body {
+            margin: 0;
+            padding: 10vw;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #FFF;
+            font-family: 'Lato', sans-serif;
+        }
+
+        header {
+            max-width: 900px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        header img {
+            width: 50%;
+            border-radius: 5px;
+            box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+        }
+
+        header section {
+            width: 70%;
+            margin-left: 2vw;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 800;
+        }
+
+        h2 {
+            font-size: 16px;
+            color: #999;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .genres {
+            padding: 0;
+            list-style: none;
+            display: flex;
+        }
+
+        .genres li {
+            background: #666;
+            padding: 5px 8px;
+            font-size: 11px;
+            margin-right: 10px;
+            border-radius: 2px;
+            color: #DDD;
+        }
+
+        p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        main article {
+            max-width: 900px;
+            margin-top: 50px;
+        }
+
+        h3 {
+            font-size: 28px;
+            font-weight: 300;
+            text-transform: uppercase;
+            color: #666
+        }
+
+        article ul {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, 1fr);
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+
+        article li > * {
+            width: 100%;
+        }
+
+        article li {
+            border-radius: 5px;
+            box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .embed-container { 
+            position: relative; 
+            padding-bottom: 56.25%; 
+            height: 0; 
+            overflow: hidden; 
+            max-width: 100%; 
+        } 
+        
+        .embed-container iframe, 
+        .embed-container object, 
+        .embed-container embed {
+            position: absolute; 
+            top: 0;
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+        }
+
+        @media screen and (max-width: 600px) {
+            header {
+                flex-direction: column;
+            }
+
+            header section {
+                width: 100%;
+                margin-top: 5vw;
+                margin-left: 0;
+            }
+            
+            header img {
+                width: 50vw;
+            }
+        }
+
+        @media screen and (max-width: 430px) {
+            article ul {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (min-width: 1000px) {
+            body {
+                padding: 80px 10vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{{ cover }}">
+        <section>
+            <h1>{{ title }}</h1>
+            <h2>{{ date }} - Score: {{ popularity }}</h2>
+            <ul class="genres">{{ genres }}</ul>
+
+            <p><b>Descrição: </b> {{ description }}</p>
+
+            <p><b>História: </b> {{ summary }}</p>
+        </section>
+    </header>
+    
+    <main>
+        <article>
+            <h3>Vídeos</h3>
+            <ul>{{ videos }}</ul>
+        </article>
+
+        <article>
+            <h3>Screenshots</h3>
+            <ul>{{ images }}</ul>
+        </article>
+    </main>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0 10vw;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        ul {
+            display: grid;
+            gap: 12px 16px;
+            grid-template-columns: repeat(4, 1fr);
+            max-width: 800px;
+            list-style: none;
+            margin-top: 10vw;
+            padding: 0;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 5px;
+            box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        @media screen and (max-width: 620px) {
+            ul {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            ul {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media screen and (max-width: 230px) {
+            ul {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (min-width: 1000px) {
+            ul {
+                margin-top: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <ul>
+        {{ replace }}
+    </ul>
+</body>
+</html>
