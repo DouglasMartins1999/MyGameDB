@@ -21,32 +21,48 @@ router.get("/register/:id", async (req, resp, next) => {
             return game;
         })
 
+    console.log(baseGame)
+
     try {
         g.screenshots = await client.fields("url")
-            .where("id = (" + baseGame.screenshots.toString() + ")")
+            .where("id = (" + (baseGame.screenshots || []).toString() + ")")
             .request("/screenshots")
             .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p")))
             .then(resp => JSON.stringify(resp));
+    } catch(e){
+        console.error(e);
+    }
     
+    try {
         g.trailers = await client.fields("video_id")
-            .where("id = (" + baseGame.videos.toString() + ")")
+            .where("id = (" + (baseGame.videos || []).toString() + ")")
             .request("/game_videos")
             .then(resp => resp.data.map(d => d.video_id))
             .then(resp => JSON.stringify(resp));
+    } catch(e){
+        console.error(e);
+    }
     
+    try {
         g.genres = await client.fields("name")
-            .where("id = (" + baseGame.genres.toString() + ")")
+            .where("id = (" + (baseGame.genres || []).toString() + ")")
             .request("/genres")
             .then(resp => resp.data.map(d => d.name))
             .then(resp => JSON.stringify(resp));
-    
+    } catch(e){
+        console.error(e);
+    }
+        
+    try {
         g.cover = await client.fields("url")
-            .where("id = (" + baseGame.cover.toString() + ")")
+            .where("id = (" + (baseGame.cover || []).toString() + ")")
             .request("/covers")
             .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p"))[0])
     } catch(e){
         console.error(e);
     }
+
+    console.log(g)
 
     await database.insert(g).into("games")
     resp.json(g);
