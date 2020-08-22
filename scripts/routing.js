@@ -31,8 +31,8 @@ router.get("/:id", async (req, resp, next) => {
         .replace("{{ date }}", moment(game.launchDate).format("MM/YYYY"))
         .replace("{{ popularity }}", game.popularity.toFixed(2))
         .replace("{{ genres }}", game.genres.split(",").map(g => `<li>${g}</li>`))
-        .replace("{{ description }}", game.description ?? "Não Informada")
-        .replace("{{ summary }}", game.summary ?? "Não Informado")
+        .replace("{{ description }}", game.description || "Não Informada")
+        .replace("{{ summary }}", game.summary || "Não Informado")
         .replace("{{ videos }}", game.trailers.split(",").map(v => {
             return `<li class='embed-container'><iframe src="https://www.youtube-nocookie.com/embed/${v}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></li>`
         }).join(""))
@@ -45,12 +45,12 @@ router.get("/:id", async (req, resp, next) => {
 
 router.get("/register/:id", async (req, resp, next) => {
     let g = new Game();
-    const search = req?.params?.id
+    const search = req.params.id
 
     const baseGame = await client.search(search)
         .fields(["name", "artworks", "category", "cover", "franchise", "genres", "rating", "first_release_date", "screenshots", "storyline", "summary", "time_to_beat", "videos", "involved_companies"])
         .request("/games")
-        .then(resp => resp?.data[0])
+        .then(resp => resp.data[0])
         .then(game => {
             g = new Game(game.id, game.name, game.storyline, game.summary, game.rating, game.first_release_date);
             return game;
