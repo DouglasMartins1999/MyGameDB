@@ -1,6 +1,7 @@
 const app = require("express")();
 const database = require("./scripts/database");
 const routes = require("./scripts/routing");
+const port = process.env.PORT ?? 8080;
 
 async function initDB(){
     const hasTable = await database.schema.hasTable("games")
@@ -22,6 +23,6 @@ async function initDB(){
 
 initDB();
 app.use(routes);
-app.listen(8080, () => {
+app.listen(port, () => {
     console.log("Servidor Iniciado. Porta 8080")
 })
