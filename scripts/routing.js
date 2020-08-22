@@ -7,6 +7,61 @@ const fs = require("fs");
 
 const client = igdb.default("***REMOVED***");
 
+router.get("/register/:id", async (req, resp, next) => {
+    let g = new Game();
+    const search = req.params.id
+
+    const baseGame = await client
+        .fields(["name", "artworks", "category", "cover", "franchise", "genres", "rating", "first_release_date", "screenshots", "storyline", "summary", "time_to_beat", "videos", "involved_companies"])
+        .where("id = " + search)
+        .request("/games")
+        .then(resp => resp.data[0])
+        .then(game => {
+            g = new Game(game.id, game.name, game.storyline, game.summary, game.rating, game.first_release_date);
+            return game;
+        })
+
+    try {
+        g.screenshots = await client.fields("url")
+            .where("id = (" + baseGame.screenshots?.toString() + ")")
+            .request("/screenshots")
+            .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p")));
+    
+        g.trailers = await client.fields("video_id")
+            .where("id = (" + baseGame.videos?.toString() + ")")
+            .request("/game_videos")
+            .then(resp => resp.data.map(d => d.video_id));
+    
+        g.genres = await client.fields("name")
+            .where("id = (" + baseGame.genres?.toString() + ")")
+            .request("/genres")
+            .then(resp => resp.data.map(d => d.name)[0])
+    
+        g.cover = await client.fields("url")
+            .where("id = (" + baseGame.cover?.toString() + ")")
+            .request("/covers")
+            .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p"))[0])
+    } catch(e){
+        console.error(e);
+    }
+
+    await database.insert(g).into("games")
+    resp.json(g);
+    return next();
+})
+
+router.get("/search", async (req, resp, next) => {
+    const base = req.protocol + "://" + req.get("Host") + "/register/";
+    const body = await client.search(req.query.q)
+        .fields(["name"])
+        .request("/games")
+        .then(resp => resp.data)
+        .then(resp => resp.map(d => ({ ...d, url: base + d.id })));
+
+    resp.json(body);
+    return next();
+})
+
 router.get("/", async (req, resp, next) => {
     const games = await database.select("id", "cover").from("games");
     games.sort((a, b) => {
@@ -41,48 +96,6 @@ router.get("/:id", async (req, resp, next) => {
 
     resp.setHeader("Content-Type", "text/html")
     resp.send(template);
-    return next();
-})
-
-router.get("/register/:id", async (req, resp, next) => {
-    let g = new Game();
-    const search = req.params.id
-
-    const baseGame = await client.search(search)
-        .fields(["name", "artworks", "category", "cover", "franchise", "genres", "rating", "first_release_date", "screenshots", "storyline", "summary", "time_to_beat", "videos", "involved_companies"])
-        .request("/games")
-        .then(resp => resp.data[0])
-        .then(game => {
-            g = new Game(game.id, game.name, game.storyline, game.summary, game.rating, game.first_release_date);
-            return game;
-        })
-
-    try {
-        g.screenshots = await client.fields("url")
-            .where("id = (" + baseGame.screenshots?.toString() + ")")
-            .request("/screenshots")
-            .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p")));
-    
-        g.trailers = await client.fields("video_id")
-            .where("id = (" + baseGame.videos?.toString() + ")")
-            .request("/game_videos")
-            .then(resp => resp.data.map(d => d.video_id));
-    
-        g.genres = await client.fields("name")
-            .where("id = (" + baseGame.genres?.toString() + ")")
-            .request("/genres")
-            .then(resp => resp.data.map(d => d.name)[0])
-    
-        g.cover = await client.fields("url")
-            .where("id = (" + baseGame.cover?.toString() + ")")
-            .request("/covers")
-            .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p"))[0])
-    } catch(e){
-        console.error(e);
-    }
-
-    await database.insert(g).into("games")
-    resp.json(g);
     return next();
 })
 
