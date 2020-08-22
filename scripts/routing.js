@@ -23,22 +23,22 @@ router.get("/register/:id", async (req, resp, next) => {
 
     try {
         g.screenshots = await client.fields("url")
-            .where("id = (" + baseGame.screenshots?.toString() + ")")
+            .where("id = (" + baseGame.screenshots.toString() + ")")
             .request("/screenshots")
             .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p")));
     
         g.trailers = await client.fields("video_id")
-            .where("id = (" + baseGame.videos?.toString() + ")")
+            .where("id = (" + baseGame.videos.toString() + ")")
             .request("/game_videos")
             .then(resp => resp.data.map(d => d.video_id));
     
         g.genres = await client.fields("name")
-            .where("id = (" + baseGame.genres?.toString() + ")")
+            .where("id = (" + baseGame.genres.toString() + ")")
             .request("/genres")
             .then(resp => resp.data.map(d => d.name)[0])
     
         g.cover = await client.fields("url")
-            .where("id = (" + baseGame.cover?.toString() + ")")
+            .where("id = (" + baseGame.cover.toString() + ")")
             .request("/covers")
             .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p"))[0])
     } catch(e){
