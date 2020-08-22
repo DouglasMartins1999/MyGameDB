@@ -11,12 +11,12 @@ async function initDB(){
             table.string("name");
             table.string("cover");
             table.dateTime("launchDate");
-            table.json("trailers");
-            table.json("genres");
+            table.string("trailers");
+            table.string("genres");
             table.string("description");
             table.string("summary");
             table.decimal("popularity", 100, 2);
-            table.json("screenshots");
+            table.string("screenshots");
         })
     }
 }

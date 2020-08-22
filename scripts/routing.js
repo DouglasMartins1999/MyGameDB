@@ -25,17 +25,20 @@ router.get("/register/:id", async (req, resp, next) => {
         g.screenshots = await client.fields("url")
             .where("id = (" + baseGame.screenshots.toString() + ")")
             .request("/screenshots")
-            .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p")));
+            .then(resp => resp.data.map(d => "https:" + d.url.replace("thumb", "720p")))
+            .then(resp => JSON.stringify(resp));
     
         g.trailers = await client.fields("video_id")
             .where("id = (" + baseGame.videos.toString() + ")")
             .request("/game_videos")
-            .then(resp => resp.data.map(d => d.video_id));
+            .then(resp => resp.data.map(d => d.video_id))
+            .then(resp => JSON.stringify(resp));
     
         g.genres = await client.fields("name")
             .where("id = (" + baseGame.genres.toString() + ")")
             .request("/genres")
-            .then(resp => resp.data.map(d => d.name)[0])
+            .then(resp => resp.data.map(d => d.name))
+            .then(resp => JSON.stringify(resp));
     
         g.cover = await client.fields("url")
             .where("id = (" + baseGame.cover.toString() + ")")
@@ -80,19 +83,21 @@ router.get("/:id", async (req, resp, next) => {
     const id = req.params.id;
     const { 0: game } = await database.select("*").from("games").where("id", id);
 
+    console.log(game)
+
     const template = fs.readFileSync("./templates/page.htm").toString()
         .replace("{{ title }}", game.name)
         .replace("{{ gametitle }}", game.name)
         .replace("{{ cover }}", game.cover)
         .replace("{{ date }}", moment(game.launchDate).format("MM/YYYY"))
         .replace("{{ popularity }}", (game.popularity || 0).toFixed(2))
-        .replace("{{ genres }}", game.genres.split(",").map(g => `<li>${g}</li>`))
+        .replace("{{ genres }}", JSON.parse(game.genres || "[]").map(g => `<li>${g}</li>`).join(""))
         .replace("{{ description }}", game.description || "Não Informada")
         .replace("{{ summary }}", game.summary || "Não Informado")
-        .replace("{{ videos }}", game.trailers.split(",").map(v => {
+        .replace("{{ videos }}", JSON.parse(game.trailers || "[]").map(v => {
             return `<li class='embed-container'><iframe src="https://www.youtube-nocookie.com/embed/${v}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></li>`
         }).join(""))
-        .replace("{{ images }}", game.screenshots.split(",").map(i => `<a href="${i}" target="_blank"><li><img src="${i}"></li></a>`).join(""))
+        .replace("{{ images }}", JSON.parse(game.screenshots || "[]").map(i => `<a href="${i}" target="_blank"><li><img src="${i}"></li></a>`).join(""))
 
     resp.setHeader("Content-Type", "text/html")
     resp.send(template);
