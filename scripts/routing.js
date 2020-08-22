@@ -56,10 +56,14 @@ router.get("/register/:id", async (req, resp, next) => {
 router.get("/search", async (req, resp, next) => {
     const base = req.protocol + "://" + req.get("Host") + "/register/";
     const body = await client.search(req.query.q)
-        .fields(["name"])
+        .fields(["name", "cover.url"])
         .request("/games")
         .then(resp => resp.data)
-        .then(resp => resp.map(d => ({ ...d, url: base + d.id })));
+        .then(resp => resp.map(d => ({ 
+            ...d, 
+            url: base + d.id,
+            cover: "https:" + (d.cover || {}).url || null
+        })));
 
     resp.json(body);
     return next();
