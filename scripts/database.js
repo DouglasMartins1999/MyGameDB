@@ -3,7 +3,7 @@ const settings = {};
 
 if(process.env.NODE_ENV === 'production'){
     settings.client = "pg";
-    settings.connection = process.env.DATABASE_URL
+    settings.connection = process.env.DATABASE_URL + "?ssl=true"
     
 } else {
     settings.useNullAsDefault = true
