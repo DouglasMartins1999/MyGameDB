@@ -1,18 +1,27 @@
-const database = require("./database");
-const Game = require("./model").Game;
 const moment = require("moment");
-const router = require("express").Router();
+const axios = require("axios").default;
 const igdb = require("igdb-api-node");
+const router = require("express").Router();
+const database = require("./database");
+const { Game } = require("./model");
 const fs = require("fs");
 
-const client = igdb.default("***REMOVED***");
+const ClientID = "***REMOVED***";
+const ClientSecret = "***REMOVED***";
+const tokenURL = `https://id.twitch.tv/oauth2/token?client_id=${ClientID}&client_secret=${ClientSecret}&grant_type=client_credentials`;
 
 router.get("/register/:id", async (req, resp, next) => {
     let g = new Game();
     const search = req.params.id
 
+    const AccessToken = await axios.post(tokenURL)
+        .then(resp => resp.data)
+        .then(data => data?.access_token);
+
+    const client = igdb.default(ClientID, AccessToken);
+
     const baseGame = await client
-        .fields(["name", "artworks", "category", "cover", "franchise", "genres", "rating", "first_release_date", "screenshots", "storyline", "summary", "time_to_beat", "videos", "involved_companies"])
+        .fields(["name", "artworks", "category", "cover", "franchise", "genres", "rating", "first_release_date", "screenshots", "storyline", "summary", "videos", "involved_companies"])
         .where("id = " + search)
         .request("/games")
         .then(resp => resp.data[0])
@@ -62,8 +71,6 @@ router.get("/register/:id", async (req, resp, next) => {
         console.error(e);
     }
 
-    console.log(g)
-
     await database.insert(g).into("games")
     resp.json(g);
     return next();
@@ -71,6 +78,11 @@ router.get("/register/:id", async (req, resp, next) => {
 
 router.get("/search", async (req, resp, next) => {
     const base = req.protocol + "://" + req.get("Host") + "/register/";
+    const AccessToken = await axios.post(tokenURL)
+        .then(resp => resp.data)
+        .then(data => data?.access_token);
+
+    const client = igdb.default(ClientID, AccessToken);
     const body = await client.search(req.query.q)
         .fields(["name", "cover.url"])
         .request("/games")
@@ -108,9 +120,6 @@ router.get("/", async (req, resp, next) => {
 router.get("/:id", async (req, resp, next) => {
     const id = req.params.id;
     const { 0: game } = await database.select("*").from("games").where("id", id);
-
-    console.log(game)
-
     const template = fs.readFileSync("./templates/page.htm").toString()
         .replace("{{ title }}", game.name)
         .replace("{{ gametitle }}", game.name)

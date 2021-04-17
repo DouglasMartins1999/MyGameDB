@@ -11,8 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "express": "^4.17.1",
-    "igdb-api-node": "^4.0.4",
+    "igdb-api-node": "^5.0.0",
     "knex": "^0.21.5",
     "moment": "^2.27.0",
     "pg": "^8.3.2",
