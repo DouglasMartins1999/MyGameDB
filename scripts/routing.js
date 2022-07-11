@@ -6,8 +6,10 @@ const database = require("./database");
 const { Game } = require("./model");
 const fs = require("fs");
 
-const ClientID = "***REMOVED***";
-const ClientSecret = "***REMOVED***";
+const ClientID = process.env.SWITCHDB_ACCESS;
+const ClientSecret = process.env.SWITCHDB_SECRET;
+const TableName = process.env.SWITCHDB_TABLE || "games";
+
 const tokenURL = `https://id.twitch.tv/oauth2/token?client_id=${ClientID}&client_secret=${ClientSecret}&grant_type=client_credentials`;
 
 router.get("/register/:id", async (req, resp, next) => {
@@ -29,8 +31,6 @@ router.get("/register/:id", async (req, resp, next) => {
             g = new Game(game.id, game.name, game.storyline, game.summary, game.rating, game.first_release_date);
             return game;
         })
-
-    console.log(baseGame)
 
     try {
         g.screenshots = await client.fields("url")
@@ -71,7 +71,7 @@ router.get("/register/:id", async (req, resp, next) => {
         console.error(e);
     }
 
-    await database.insert(g).into("games")
+    await database.insert(g).into(TableName)
     resp.json(g);
     return next();
 })
@@ -98,13 +98,13 @@ router.get("/search", async (req, resp, next) => {
 })
 
 router.get("/delete/:id", async (req, resp, next) => {
-    await database.delete().from("games").where("id", req.params.id);
+    await database.delete().from(TableName).where("id", req.params.id);
     resp.json({ msg: "Deleted" });
     return next();
 })
 
 router.get("/", async (req, resp, next) => {
-    const games = await database.select("id", "cover").from("games");
+    const games = await database.select("id", "cover").from(TableName);
     games.sort((a, b) => {
         return 0.5 - Math.random()
     })
@@ -119,7 +119,7 @@ router.get("/", async (req, resp, next) => {
 
 router.get("/:id", async (req, resp, next) => {
     const id = req.params.id;
-    const { 0: game } = await database.select("*").from("games").where("id", id);
+    const { 0: game } = await database.select("*").from(TableName).where("id", id);
     const template = fs.readFileSync("./templates/page.htm").toString()
         .replace("{{ title }}", game.name)
         .replace("{{ gametitle }}", game.name)

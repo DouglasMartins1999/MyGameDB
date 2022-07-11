@@ -4,7 +4,7 @@ const settings = {};
 if(process.env.NODE_ENV === 'production'){
     settings.client = "pg";
     settings.connection = {
-        connectionString: process.env.DATABASE_URL,
+        connectionString: process.env.SWITCHDB_DATABASE_URL,
         ssl: { rejectUnauthorized: false }
     }
     
@@ -12,7 +12,7 @@ if(process.env.NODE_ENV === 'production'){
     settings.useNullAsDefault = true
     settings.client = "sqlite3"
     settings.connection = {
-        filename: "./db.sqlite",
+        filename: process.env.SWITCHDB_DATABASE_FILE || "./db.sqlite",
     }
 }
 
